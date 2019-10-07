@@ -66,7 +66,6 @@ class Controller extends BaseController
             return self::response([],"缺少参数");
         }
 
-        $data["error"] = "";
         $data["info"]  = AssociationModel::find($sid);
         if (empty($data["info"]))
         {
