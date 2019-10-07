@@ -15,20 +15,35 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, AuthorizesResources, DispatchesJobs, ValidatesRequests;
 
+    public static function response($data, $error="")
+    {
+        return response(["error" => $error, "data" => $data], 200)
+            ->header('Access-Control-Allow-Origin', "*")
+            ->header(
+                'Access-Control-Allow-Headers',
+                'Origin, Content-Type, Cookie, X-CSRF-TOKEN, Accept, Authorization, X-XSRF-TOKEN'
+            )
+            ->header('Access-Control-Expose-Headers', 'Authorization, authenticated')
+            ->header('Access-Control-Allow-Methods', 'GET, POST, PATCH, PUT, OPTIONS')
+            ->header('Access-Control-Allow-Credentials', 'true');
+    }
+
     public function index()
     {
-        return "vote";
+
+        return 1;
     }
+
     public function association_list(Request $request)
     {
-        $data["error"] = "";
+
         $data['list']  = AssociationModel::orderBy("ticket", "desc")->get();
         foreach ($data['list'] as &$value)
         {
             $value->association_image = explode("|", $value->association_image);
         }
 
-        return $data;
+        return self::response($data,"");
     }
 
     public function get_last_ticket(Request $request)
@@ -36,11 +51,11 @@ class Controller extends BaseController
         $telPhone = $request->input("tel_phone");
         if (!$telPhone)
         {
-            return ["error" => "缺少参数"];
+            return self::response([],"缺少参数");
         }
         $vote_log = VoteLogModel::where("tel_phone", $telPhone)->get();
 
-        return ["error" => "", "last" => 40 - count($vote_log)];
+        return self::response(["num" => 40 - count($vote_log)]);
     }
 
     public function association_info(Request $request)
@@ -48,14 +63,14 @@ class Controller extends BaseController
         $sid = $request->input("sid");
         if (!$sid)
         {
-            return ["error" => "缺少参数"];
+            return self::response([],"缺少参数");
         }
 
         $data["error"] = "";
         $data["info"]  = AssociationModel::find($sid);
         if (empty($data["info"]))
         {
-            return ["error" => "不存在该社团"];
+            return self::response([],"不存在该社团");
         }
         $data["info"]->association_image = explode("|", $data["info"]->association_image);
 
@@ -68,18 +83,19 @@ class Controller extends BaseController
         $sid      = $request->input("sid");
         if (!$sid || !$telPhone)
         {
-            return ["error" => "缺少参数"];
+            return self::response([],"缺少参数");
         }
         $vote_log = VoteLogModel::where("tel_phone", $telPhone)->get();
         if (count($vote_log) >= 40)
         {
-            return ["error" => "只能投40票"];
+            return self::response([],"只能投40票");
+
         }
         foreach ($vote_log as $value)
         {
             if ($value->sid == $sid)
             {
-                return ["error" => "已经投票过该社团"];
+                return self::response([],"已经投票过该社团");
             }
         }
 
@@ -89,6 +105,6 @@ class Controller extends BaseController
         $log->time      = date("Y-m-d H:i:s", time());
         $log->save();
 
-        return ["error" => ""];
+        return self::response([]);
     }
 }
