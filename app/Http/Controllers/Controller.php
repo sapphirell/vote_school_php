@@ -15,6 +15,10 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, AuthorizesResources, DispatchesJobs, ValidatesRequests;
 
+    public function index()
+    {
+        return "vote";
+    }
     public function association_list(Request $request)
     {
         $data["error"] = "";
