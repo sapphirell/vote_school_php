@@ -74,7 +74,7 @@ class Controller extends BaseController
         }
         $data["info"]->association_image = explode("|", $data["info"]->association_image);
 
-        return $data;
+        return self::response($data);
     }
 
     public function vote_association(Request $request)
